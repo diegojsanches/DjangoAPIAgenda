@@ -9,6 +9,7 @@ from django_changed_fields import ChangedFieldsMixin
 
 
 class TbLog(models.Model):
+    user = models.PositiveIntegerField(null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -37,6 +38,8 @@ class MyModelBase(ChangedFieldsMixin, models.Model):
     objects = ModelSafelyDeleteManager()
     default_objects = ModelSafelyDeleteQuerySet.as_manager()
 
+    owner = models.ForeignKey(get_user_model(), models.CASCADE)
+
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True)
@@ -57,6 +60,7 @@ class MyModelBase(ChangedFieldsMixin, models.Model):
                 old_value_fields = ', '.join(str(old_value_fields.get(old)) for old in changed_fields)
 
             TbLog(
+                user=getattr(self, 'owner_id', None),
                 content_object=self,
                 fields=', '.join(changed_fields),
                 new_value_fields=new_value_fields,

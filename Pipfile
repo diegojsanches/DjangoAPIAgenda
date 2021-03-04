@@ -7,6 +7,7 @@ name = "pypi"
 Django = "*"
 django-changed-fields = "*"
 drf-writable-nested = "*"
+djangorestframework = "*"
 
 [dev-packages]
 coverage = "*"
