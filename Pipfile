@@ -8,6 +8,7 @@ Django = "*"
 django-changed-fields = "*"
 drf-writable-nested = "*"
 djangorestframework = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 coverage = "*"

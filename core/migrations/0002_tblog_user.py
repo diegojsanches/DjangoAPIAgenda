@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='tblog',
+            model_name='log',
             name='user',
             field=models.PositiveIntegerField(null=True),
         ),

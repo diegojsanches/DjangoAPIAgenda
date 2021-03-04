@@ -8,7 +8,7 @@ from django.forms import model_to_dict
 from django_changed_fields import ChangedFieldsMixin
 
 
-class TbLog(models.Model):
+class Log(models.Model):
     user = models.PositiveIntegerField(null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     object_id = models.PositiveIntegerField(null=True)
@@ -26,7 +26,17 @@ class TbLog(models.Model):
 class ModelSafelyDeleteQuerySet(models.QuerySet):
     @transaction.atomic
     def delete(self):
-        self.update(deleted_at=datetime.now())
+        now = datetime.now()
+        Log.objects.bulk_create(
+            map(lambda item: Log(
+                user=getattr(item, 'owner_id', None),
+                content_object=item,
+                fields='deleted_at',
+                new_value_fields=now,
+                old_value_fields='None',
+            ), self)
+        )
+        self.update(deleted_at=now)
 
 
 class ModelSafelyDeleteManager(models.Manager):
@@ -47,19 +57,22 @@ class MyModelBase(ChangedFieldsMixin, models.Model):
     class Meta:
         abstract = True
 
+    @transaction.atomic
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         changed_fields = self.change_fields()
         if len(changed_fields):
             new_value_fields = model_to_dict(self, fields=changed_fields)
-            new_value_fields = ', '.join(str(new_value_fields.get(new)) for new in changed_fields)
+            new_value_fields = ', '.join(map(lambda new: str(new_value_fields.get(new)), changed_fields))
 
             last_queryset = self.last_queryset()
             old_value_fields = ''
             if last_queryset:
                 old_value_fields = model_to_dict(last_queryset, fields=changed_fields)
-                old_value_fields = ', '.join(str(old_value_fields.get(old)) for old in changed_fields)
+                old_value_fields = ', '.join(map(lambda old: str(old_value_fields.get(old)), changed_fields))
 
-            TbLog(
+            super().save(force_insert, force_update, using, update_fields)
+
+            Log(
                 user=getattr(self, 'owner_id', None),
                 content_object=self,
                 fields=', '.join(changed_fields),
@@ -67,7 +80,8 @@ class MyModelBase(ChangedFieldsMixin, models.Model):
                 old_value_fields=old_value_fields,
             ).save(force_insert, force_update, using, update_fields)
 
-        return super().save(force_insert, force_update, using, update_fields)
+            return
+        super().save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None, keep_parents=False):
         self.deleted_at = datetime.now()
