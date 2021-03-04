@@ -9,6 +9,10 @@ django-changed-fields = "*"
 drf-writable-nested = "*"
 djangorestframework = "*"
 djangorestframework-simplejwt = "*"
+boto3 = "*"
+django-storages = "*"
+django-environ = "*"
+pillow = "*"
 
 [dev-packages]
 coverage = "*"
