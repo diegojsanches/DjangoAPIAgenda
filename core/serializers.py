@@ -3,9 +3,7 @@ from rest_framework import serializers
 
 class MyModelBaseSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    owner_name = serializers.SerializerMethodField()
+    owner_name = serializers.CharField(source='owner.name', read_only=True)
+    owner_id = serializers.IntegerField(source='owner.id', read_only=True)
 
     deleted_at = serializers.ReadOnlyField()
-
-    def get_owner_name(self, obj):
-        return obj.owner.get_full_name()

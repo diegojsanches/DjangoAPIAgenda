@@ -1,11 +1,15 @@
 from rest_framework import viewsets
 
-from core.views import MyModelBaseViewSet
-
 from Contact.Address.models import Address
 from Contact.Address.serializers import AddressSerializer
 
 
-class AddressViewSet(MyModelBaseViewSet, viewsets.ModelViewSet):
+class AddressViewSet(viewsets.ModelViewSet):
     queryset = Address.objects
     serializer_class = AddressSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.user.is_authenticated:
+            return queryset.filter(owner=self.request.user)
+        return queryset.none()

@@ -12,9 +12,12 @@ class ContactSerializer(MyModelBaseSerializer, WritableNestedModelSerializer):
         model = Contact
         fields = (
             'pk',
+            'owner',
+            'owner_id',
             'owner_name',
             'name',
-            'is_global',
+            'image',
+            'is_public',
             'fone',
             'email',
             'addresses',

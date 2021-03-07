@@ -13,6 +13,8 @@ boto3 = "*"
 django-storages = "*"
 django-environ = "*"
 pillow = "*"
+django-cors-headers = "*"
+django-filter = "*"
 
 [dev-packages]
 coverage = "*"
